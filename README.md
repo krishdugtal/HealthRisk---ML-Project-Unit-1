@@ -56,6 +56,12 @@
 
 ---
 
+### 6. History
+![History](docs/assets/06_history.png)
+*Per-user SQLite assessment audit history and personal time-series risk trends computing Expectation $E[\text{Risk}]$, Variance $\text{Var}(\text{Risk})$, and Standard Deviation $SD(\text{Risk})$ across saved runs.*
+
+---
+
 ## 📁 Kaggle Framingham Heart Study Dataset Integration
 
 The Population Discrete Random Variable Analytics module is powered by the **real-world Kaggle Framingham Heart Study Dataset** (`framingham_kaggle_real.csv`).
@@ -112,7 +118,8 @@ ML-Unit1/
 │       ├── 02_viva_math_inspector_simple_view.png
 │       ├── 03_viva_math_inspector_math_view.png
 │       ├── 04_population_stats_rv_kaggle.png
-│       └── 05_dataset_table.png
+│       ├── 05_dataset_table.png
+│       └── 06_history.png
 ├── tests/
 │   └── test_bayes_engine.py        # 5/5 Passing Unit Tests
 ├── framingham_kaggle_real.csv      # Real Kaggle Framingham Heart Study Dataset (N=4,221 records)
