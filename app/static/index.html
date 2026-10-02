@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HealthRisk - Bayesian Health Risk Assessment</title>
+  <!-- Apple System Typography & Icons -->
+  <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
+<body>
+
+  <!-- Top Navigation Header (Frosted Glass) -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="logo-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+            <path d="M12 5v14"/>
+            <path d="M5 12h14"/>
+          </svg>
+        </div>
+        <div>
+          <h1>HealthRisk</h1>
+          <p class="subtitle">Bayesian Inference Engine • Academic Decision-Support System</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs (Pill Style) -->
+      <nav class="nav-tabs">
+        <button class="nav-btn active" data-tab="tab-assess">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          New Assessment
+        </button>
+        <button class="nav-btn" data-tab="tab-dashboard">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+          Viva Math Inspector
+        </button>
+        <button class="nav-btn" data-tab="tab-stats">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+          Population Stats (RV)
+        </button>
+        <button class="nav-btn" data-tab="tab-history">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          My History (SQLite)
+        </button>
+      </nav>
+
+      <!-- Auth User Badge -->
+      <div id="auth-status-container" style="display: flex; align-items: center; gap: 0.6rem;">
+        <span id="user-badge-email" class="code-badge" style="font-size: 0.78rem;">demo@healthrisk.edu</span>
+        <button id="btn-auth-action" class="btn-secondary" style="padding: 0.35rem 0.85rem; font-size: 0.78rem;">Login / Register</button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Notice Disclaimer Bar -->
+  <div class="disclaimer-bar">
+    <span class="disclaimer-badge">EDUCATIONAL DECISION-SUPPORT TOOL</span>
+    <span class="disclaimer-text">Calculates P(Condition | Symptoms) using explicit Bayes' rule for academic evaluation. Does NOT provide medical diagnosis.</span>
+  </div>
+
+  <main class="main-content">
+
+    <!-- AUTH MODAL -->
+    <div id="auth-modal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); z-index: 2000; display: flex; align-items: center; justify-content: center;">
+      <div class="glass-card" style="width: 100%; max-width: 420px; position: relative;">
+        <button id="btn-close-auth" style="position: absolute; top: 1.25rem; right: 1.25rem; background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 1.2rem;">✕</button>
+        <div class="card-header">
+          <div class="step-num">🔐</div>
+          <div>
+            <h2 id="auth-title">Account Authentication</h2>
+            <p>Login or Register for per-user history tracking</p>
+          </div>
+        </div>
+
+        <form id="auth-form">
+          <div class="form-group">
+            <label for="auth-email">Email Address</label>
+            <input type="text" id="auth-email" placeholder="user@domain.com" required>
+          </div>
+          <div class="form-group">
+            <label for="auth-password">Password</label>
+            <input type="password" id="auth-password" placeholder="••••••••" required>
+          </div>
+          <div id="auth-error-msg" class="hidden" style="color: var(--accent-crimson); font-size: 0.85rem; margin-bottom: 0.85rem; font-weight: 500;"></div>
+
+          <div style="display: flex; gap: 0.75rem;">
+            <button type="button" id="btn-submit-login" class="btn-primary" style="flex: 1;">Login</button>
+            <button type="button" id="btn-submit-register" class="btn-secondary" style="flex: 1; justify-content: center;">Register</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+
+    <!-- TAB 1: NEW ASSESSMENT FORM -->
+    <section id="tab-assess" class="tab-pane active">
+      <div class="grid-2col">
+
+        <!-- Patient Profile Form -->
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="step-num">1</div>
+            <div>
+              <h2>Patient Profile & Prior Modifiers</h2>
+              <p>Base rates P(Condition) are dynamically adjusted by age and family history.</p>
+            </div>
+          </div>
+
+          <form id="assessment-form">
+            <div class="form-group">
+              <label for="patient-name">Patient Name / Identifier</label>
+              <input type="text" id="patient-name" placeholder="e.g. Rahul Sharma" value="Rahul Sharma" required>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="patient-age">Age (Years)</label>
+                <input type="number" id="patient-age" min="1" max="120" value="45" required>
+              </div>
+
+              <div class="form-group">
+                <label for="age-group-display">Computed Age Bracket</label>
+                <input type="text" id="age-group-display" value="30-50" readonly class="readonly-input">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Family History of Target Conditions?</label>
+              <div class="radio-group">
+                <label class="radio-btn">
+                  <input type="radio" name="family_history" value="yes">
+                  <span>Yes (Increases Prior Risk P(C))</span>
+                </label>
+                <label class="radio-btn">
+                  <input type="radio" name="family_history" value="no" checked>
+                  <span>No (Standard Base Prior)</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Select Target Conditions for Evaluation</label>
+              <div class="checkbox-group inline-checkboxes">
+                <label class="checkbox-btn">
+                  <input type="checkbox" name="condition" value="diabetes_t2" checked>
+                  <span>Type 2 Diabetes Risk</span>
+                </label>
+                <label class="checkbox-btn">
+                  <input type="checkbox" name="condition" value="cardiovascular" checked>
+                  <span>Cardiovascular Disease Risk</span>
+                </label>
+                <label class="checkbox-btn">
+                  <input type="checkbox" name="condition" value="hypertension">
+                  <span>Hypertension Risk</span>
+                </label>
+              </div>
+            </div>
+
+          </form>
+        </div>
+
+        <!-- Symptom Checklist Card -->
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="step-num">2</div>
+            <div>
+              <h2>Symptom Observation Checklist</h2>
+              <p>Model presence of symptoms as Bernoulli random variables S<sub>i</sub> ∈ {0, 1}.</p>
+            </div>
+          </div>
+
+          <div id="symptoms-container" class="symptoms-grid">
+            <!-- Dynamic symptom items populated by JS -->
+          </div>
+
+          <div class="action-footer">
+            <button type="button" id="btn-compute" class="btn-primary">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6"/><path d="M8 11h6"/></svg>
+              Compute Bayesian Posterior Risk
+            </button>
+            <button type="button" id="btn-reset-demo" class="btn-secondary" style="width: 100%; margin-top: 0.75rem; justify-content: center;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+              Reset to Demo Reference Patient (Rahul Sharma, 88.96% Cardio)
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- TAB 2: VIVA MATH INSPECTOR & DASHBOARD -->
+    <section id="tab-dashboard" class="tab-pane">
+      <div id="no-results-placeholder" class="glass-card text-center padding-xl">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="1.5" style="margin-bottom: 1rem;"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+        <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">No active assessment run yet</h3>
+        <p style="color: var(--text-secondary); max-width: 500px; margin: 0 auto 1.5rem auto;">Please fill out the patient profile and symptom checklist on the "New Assessment" tab and click <strong>Compute Bayesian Posterior Risk</strong>.</p>
+        <button class="btn-secondary" onclick="switchTab('tab-assess')">Go to Assessment Form</button>
+      </div>
+
+      <div id="results-container" class="hidden">
+        <!-- Patient Summary Bar -->
+        <div class="patient-summary-card glass-card">
+          <div class="patient-info-row">
+            <div>
+              <span class="meta-label">PATIENT RECORD</span>
+              <h3 id="res-patient-name" style="font-size: 1.1rem; font-weight: 600;">Rahul Sharma</h3>
+            </div>
+            <div>
+              <span class="meta-label">AGE / BRACKET</span>
+              <p id="res-patient-age" style="font-weight: 500;">45 years (30-50)</p>
+            </div>
+            <div>
+              <span class="meta-label">FAMILY HISTORY</span>
+              <p id="res-patient-family" style="font-weight: 500;">No</p>
+            </div>
+            <div>
+              <span class="meta-label">REPORTED SYMPTOMS</span>
+              <p id="res-symptoms-count" style="font-weight: 500;">0 Symptoms</p>
+            </div>
+            <div>
+              <span class="meta-label">DB RECORD ID</span>
+              <p id="res-db-id" class="code-badge">#1</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Risk Score Bars Grid -->
+        <h2 class="section-title">Posterior Probability Summary P(Condition | Symptoms)</h2>
+        <div id="risk-bars-container" class="grid-2col margin-bottom-lg">
+          <!-- Dynamic Condition Risk Bar Cards -->
+        </div>
+
+        <!-- Detailed Viva Math Inspector Accordion -->
+        <div class="section-header-flex" style="flex-wrap: wrap; gap: 0.75rem;">
+          <h2 class="section-title" style="margin-bottom: 0;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+            Viva Math Inspector (Step-by-Step Bayes Breakdown)
+          </h2>
+          
+          <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+            <!-- Simple vs Full Math View Toggle -->
+            <div class="view-toggle-container">
+              <button type="button" id="btn-view-simple" class="btn-toggle active">Simple View</button>
+              <button type="button" id="btn-view-full" class="btn-toggle">Full Math View</button>
+            </div>
+            <span class="badge-tag">EXAMINATION MODE</span>
+          </div>
+        </div>
+
+        <div id="math-breakdown-container">
+          <!-- Dynamic Condition Math Cards -->
+        </div>
+      </div>
+    </section>
+
+
+    <!-- TAB 3: POPULATION STATISTICS (EXPECTATION, VARIANCE & COVARIANCE) -->
+    <section id="tab-stats" class="tab-pane">
+      <div class="section-header-flex">
+        <div>
+          <h2 class="section-title">Population Discrete Random Variable Analytics</h2>
+          <p class="section-desc">Sample population metrics computed via pure Python functions for Expectation E[X], Variance Var(X), and Covariance Cov(X, Y).</p>
+        </div>
+        
+        <!-- CSV Upload Controls -->
+        <div style="display: flex; gap: 0.6rem; align-items: center;">
+          <input type="file" id="csv-file-input" accept=".csv" class="hidden">
+          <button id="btn-upload-csv" class="btn-secondary">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Upload Custom CSV
+          </button>
+          <button id="btn-refresh-stats" class="btn-secondary">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6"/><path d="M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <!-- Active Dataset Banner -->
+      <div class="disclaimer-bar margin-bottom-lg" style="background: var(--accent-primary-tint); border-color: rgba(0, 113, 227, 0.2); color: var(--accent-primary);">
+        <span class="disclaimer-badge" style="background: rgba(0, 113, 227, 0.15); color: var(--accent-primary);">ACTIVE DATASET</span>
+        <span id="active-dataset-label" class="disclaimer-text">Bundled Sample (N=25) — Used strictly for population-level RV statistics, separate from per-patient Bayesian inference.</span>
+      </div>
+
+      <!-- Stat Metric Cards -->
+      <div class="grid-3col margin-bottom-lg">
+        
+        <!-- Expectation E[X] Card -->
+        <div class="stat-card glass-card">
+          <div class="stat-card-header">
+            <span class="stat-label">EXPECTATION E[X]</span>
+            <span class="stat-formula">E[X] = (1/n) ∑ x<sub>i</sub></span>
+          </div>
+          <div class="stat-value" id="stat-e-risk">--</div>
+          <p class="stat-subtext">Mean Risk Score E[Risk] (%)</p>
+          <div class="stat-divider"></div>
+          <div class="stat-mini-row">
+            <span>Mean BMI E[BMI]:</span>
+            <strong id="stat-e-bmi">--</strong>
+          </div>
+          <div class="stat-mini-row">
+            <span>Mean Systolic BP E[BP]:</span>
+            <strong id="stat-e-bp">--</strong>
+          </div>
+        </div>
+
+        <!-- Variance Var(X) Card -->
+        <div class="stat-card glass-card">
+          <div class="stat-card-header">
+            <span class="stat-label">VARIANCE Var(X) & SD</span>
+            <span class="stat-formula">Var(X) = (1/n) ∑ (x<sub>i</sub> - E[X])²</span>
+          </div>
+          <div class="stat-value" id="stat-var-risk">--</div>
+          <p class="stat-subtext">Risk Variance (SD: <span id="stat-sd-risk">--</span>)</p>
+          <div class="stat-divider"></div>
+          <div class="stat-mini-row">
+            <span>BMI Variance (SD):</span>
+            <strong id="stat-var-bmi">--</strong>
+          </div>
+          <div class="stat-mini-row">
+            <span>BP Variance (SD):</span>
+            <strong id="stat-var-bp">--</strong>
+          </div>
+        </div>
+
+        <!-- Covariance Cov(X, Y) Card -->
+        <div class="stat-card glass-card highlight-card">
+          <div class="stat-card-header">
+            <span class="stat-label">COVARIANCE Cov(BMI, BP)</span>
+            <span class="stat-formula">Cov(X,Y) = (1/n) ∑ (x<sub>i</sub> - E[X])(y<sub>i</sub> - E[Y])</span>
+          </div>
+          <div class="stat-value color-accent" id="stat-cov-val">--</div>
+          <p class="stat-subtext">N = <span id="stat-cov-n">25</span> Sample Data Points</p>
+          <div class="stat-divider"></div>
+          <div class="interpretation-box">
+            <span class="meta-label">PLAIN-ENGLISH INTERPRETATION</span>
+            <p id="stat-cov-interp" class="interp-text">Loading population covariance analysis...</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Scatter Plot Canvas Container -->
+      <div class="glass-card margin-bottom-lg">
+        <div class="section-header-flex">
+          <div>
+            <h3 style="font-size: 1.15rem; font-weight: 600;">Population Scatter Plot: BMI vs. Systolic Blood Pressure</h3>
+            <p class="section-desc">Visualizing joint variability and mean point (E[BMI], E[BP]) marked distinctly in amber gold.</p>
+          </div>
+        </div>
+        <div style="position: relative; width: 100%; height: 320px; background: var(--bg-card); border-radius: var(--radius-sm); border: 1px solid var(--border-color); padding: 10px;">
+          <canvas id="scatter-canvas" width="800" height="300" style="width: 100%; height: 100%; display: block;"></canvas>
+        </div>
+      </div>
+
+      <!-- Formula Inspector Breakdown for Stats -->
+      <div class="section-header-flex">
+        <h2 class="section-title">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+          Population Stats Formula Inspector
+        </h2>
+        <span class="badge-tag">PURE PYTHON DERIVATION</span>
+      </div>
+
+      <div class="math-condition-card glass-card">
+        <div class="math-step-block">
+          <div class="math-step-title">
+            <span>STEP 1: Expectation E[X]</span>
+          </div>
+          <p style="font-size: 0.88rem; color: var(--text-secondary);">Sum of all n observation values divided by sample size n.</p>
+          <div class="math-formula-box" id="formula-box-expectation">E[X] = (1/n) * ∑ x_i</div>
+        </div>
+
+        <div class="math-step-block">
+          <div class="math-step-title">
+            <span>STEP 2: Variance Var(X)</span>
+          </div>
+          <p style="font-size: 0.88rem; color: var(--text-secondary);">Average squared deviation from the expected value E[X].</p>
+          <div class="math-formula-box" id="formula-box-variance">Var(X) = (1/n) * ∑ (x_i - E[X])²</div>
+        </div>
+
+        <div class="math-step-block" style="border-color: var(--border-strong); background: var(--accent-emerald-tint);">
+          <div class="math-step-title" style="color: #1E8E3E;">
+            <span>STEP 3: Covariance Cov(BMI, BP)</span>
+          </div>
+          <p style="font-size: 0.88rem; color: var(--text-secondary);">Sum of joint product deviations from respective means.</p>
+          <div class="math-formula-box" id="formula-box-covariance" style="border-left-color: #34C759;">Cov(X,Y) = (1/n) * ∑ (x_i - E[X])(y_i - E[Y])</div>
+        </div>
+      </div>
+
+      <!-- Sample Dataset Table -->
+      <div class="glass-card">
+        <h3 style="font-size: 1.15rem; font-weight: 600;">Active Population Dataset Table</h3>
+        <p class="section-desc" id="dataset-table-desc">Loaded active records.</p>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Patient ID</th>
+                <th>Age</th>
+                <th>BMI (kg/m²)</th>
+                <th>Systolic BP (mmHg)</th>
+                <th>Risk Score (%)</th>
+              </tr>
+            </thead>
+            <tbody id="population-table-body">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- TAB 4: HISTORICAL ASSESSMENTS & USER TRENDS -->
+    <section id="tab-history" class="tab-pane">
+      
+      <!-- Personal Risk Trend Panel -->
+      <div class="glass-card margin-bottom-lg" style="border-color: rgba(0, 113, 227, 0.2); background: linear-gradient(180deg, var(--accent-primary-tint) 0%, #FFFFFF 100%);">
+        <div class="section-header-flex">
+          <div>
+            <h2 class="section-title">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              Personal Time-Series Risk Trends (RV Expectation & Variance)
+            </h2>
+            <p class="section-desc">Expectation E[Risk] and Variance Var(Risk) computed across your personal history of saved assessments.</p>
+          </div>
+        </div>
+
+        <div id="user-trends-container">
+          <!-- Dynamic personal trend stats or < 3 runs notice -->
+        </div>
+      </div>
+
+      <!-- Historical Assessments Audit Log -->
+      <div class="section-header-flex">
+        <div>
+          <h2 class="section-title">Historical Assessments Audit Log (Per-User SQLite)</h2>
+          <p class="section-desc">Past Bayesian risk assessment runs saved for your account in <code>health_risk.db</code>.</p>
+        </div>
+        <button id="btn-refresh-history" class="btn-secondary">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6"/><path d="M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+          Refresh Audit Log
+        </button>
+      </div>
+
+      <div class="glass-card">
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Run #</th>
+                <th>Date & Time</th>
+                <th>Patient Name</th>
+                <th>Age</th>
+                <th>Family Hist.</th>
+                <th>Symptoms Reported</th>
+                <th>Computed Posteriors</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="history-table-body">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="app.js?v=2.0"></script>
+</body>
+</html>
