@@ -24,6 +24,38 @@
 
 ---
 
+## 📸 Visual Walkthrough & Interface Screenshots
+
+### 1. New Assessment
+![New Assessment](docs/assets/01_new_assessment.png)
+*Interactive patient profile setup and symptom observation checklist allowing dynamic age bracket calculation, family history risk multiplier selection, and multi-condition evaluation.*
+
+---
+
+### 2. Viva Math Inspector - Simple View
+![Viva Math Inspector - Simple View](docs/assets/02_viva_math_inspector_simple_view.png)
+*High-level overview displaying posterior probability risk score bars alongside the 4-step Bayesian calculation summary cards for clean, immediate demonstration.*
+
+---
+
+### 3. Viva Math Inspector - Math View
+![Viva Math Inspector - Math View](docs/assets/03_viva_math_inspector_math_view.png)
+*Complete step-by-step mathematical derivation mode exposing dynamic priors, Bernoulli likelihood matrices with complement rule derivations ($1 - P$) for absent symptoms, and Naive Bayes joint likelihood products for viva voce examination.*
+
+---
+
+### 4. Population Stats (RV) of Kaggle Framingham Heart Study Dataset
+![Population Stats (RV) of Kaggle Framingham Heart Study Dataset](docs/assets/04_population_stats_rv_kaggle.png)
+*Real-time population-level Discrete Random Variable analytics computing Expectation $E[X]$, Variance $\text{Var}(X)$, and Covariance $\text{Cov}(\text{BMI}, \text{Systolic BP}) = +29.29$ over $N=4,221$ clinical records, paired with an HTML5 canvas bivariate scatter plot highlighting the sample centroid in Amber Gold.*
+
+---
+
+### 5. Dataset Table
+![Dataset Table](docs/assets/05_dataset_table.png)
+*Interactive clinical record browser displaying active patient rows from the Kaggle Framingham Heart Study dataset, including Patient ID, Age, BMI, Systolic Blood Pressure, and composite Risk Score.*
+
+---
+
 ## 📁 Kaggle Framingham Heart Study Dataset Integration
 
 The Population Discrete Random Variable Analytics module is powered by the **real-world Kaggle Framingham Heart Study Dataset** (`framingham_kaggle_real.csv`).
@@ -74,6 +106,13 @@ ML-Unit1/
 │   │   ├── index.html              # Apple Light Mode SPA UI with Auth Modal, Personal Trends & CSV Upload
 │   │   ├── styles.css              # Apple Design System Styling (#F5F5F7 canvas, #0071E3 CTAs, frosted glass)
 │   │   └── app.js                  # Frontend SPA logic & Bivariate Scatter Plot Canvas Renderer
+├── docs/
+│   └── assets/                     # Application Interface Screenshots
+│       ├── 01_new_assessment.png
+│       ├── 02_viva_math_inspector_simple_view.png
+│       ├── 03_viva_math_inspector_math_view.png
+│       ├── 04_population_stats_rv_kaggle.png
+│       └── 05_dataset_table.png
 ├── tests/
 │   └── test_bayes_engine.py        # 5/5 Passing Unit Tests
 ├── framingham_kaggle_real.csv      # Real Kaggle Framingham Heart Study Dataset (N=4,221 records)
